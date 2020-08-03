@@ -1,0 +1,101 @@
+diff -Naurw ./drivers/media/i2c/ap1302.c ../kernel-source/drivers/media/i2c/ap1302.c
+--- ./drivers/media/i2c/ap1302.c	2020-08-03 18:40:33.703410103 +0200
++++ ../kernel-source/drivers/media/i2c/ap1302.c	2020-08-03 18:50:18.675161459 +0200
+@@ -34,6 +34,9 @@
+ 
+ #define AP1302_DBG_CONSOLE_OUTPUT   0
+ 
++#define AP1302_FW_TEST    "ap1302/test_pattern.bin"
++#define AP1302_FW_NORMAL  "ap1302/on_ar1337_cdaf_dw9718.290520_01.bin"
++
+ /* min/typical/max system clock (xclk) frequencies */
+ #define AP1302_XCLK_MIN 24000000
+ #define AP1302_XCLK_MAX 24000000
+@@ -93,12 +96,14 @@
+ 
+ enum ap1302_mode_id {
+ 	AP1302_MODE_VGA_640_480 = 0,
++	AP1302_MODE_1024_576,
+ 	AP1302_MODE_720P_1280_720,
+ 	AP1302_NUM_MODES,
+ };
+ 
+ enum ap1302_frame_rate {
+-	AP1302_15_FPS = 0,
++	AP1302_10_FPS = 0,
++	AP1302_15_FPS,
+ 	AP1302_24_FPS,
+ 	AP1302_30_FPS,
+ 	AP1302_NUM_FRAMERATES,
+@@ -124,6 +129,7 @@
+ 		 "MIPI CSI-2 virtual channel (0..3), default 0");
+ 
+ static const int ap1302_framerates[] = {
++	[AP1302_10_FPS] = 10,
+ 	[AP1302_15_FPS] = 15,
+ 	[AP1302_24_FPS] = 24,
+ 	[AP1302_30_FPS] = 30,
+@@ -136,15 +142,6 @@
+ 
+ #define AP1302_NUM_SUPPLIES ARRAY_SIZE(ap1302_supply_name)
+ 
+-/*
+- * Image size under 1280 * 960 are SUBSAMPLING
+- * Image size upper 1280 * 960 are SCALING
+- */
+-enum ap1302_downsize_mode {
+-	SUBSAMPLING,
+-	SCALING,
+-};
+-
+ struct reg_value {
+ 	u16 reg_addr;
+ 	u8 val;
+@@ -255,6 +252,13 @@
+ 	{ 4, { 0x11, 0x84,  0x00, 0x0B }, },
+ };
+ 
++static struct ap1302_reg_value ap1302_mode_1024_576[ ] = {
++	{ 4, { 0x11, 0x84,  0x00, 0x01 }, },
++	{ 4, { 0x20, 0x00,  0x04, 0x00 }, },
++	{ 4, { 0x20, 0x02,  0x02, 0x40 }, },
++	{ 4, { 0x11, 0x84,  0x00, 0x0B }, },
++};
++
+ static struct ap1302_reg_value ap1302_mode_1280_720[ ] = {
+ 	{ 4, { 0x11, 0x84,  0x00, 0x01 }, },
+ 	{ 4, { 0x20, 0x00,  0x05, 0x00 }, },
+@@ -265,6 +269,7 @@
+ static const struct ap1302_mode_info
+ ap1302_mode_data[AP1302_NUM_MODES] = {
+ 	{AP1302_MODE_VGA_640_480, 640, 480, ap1302_mode_640_480, ARRAY_SIZE(ap1302_mode_640_480)},
++	{AP1302_MODE_1024_576, 1024, 576, ap1302_mode_1024_576, ARRAY_SIZE(ap1302_mode_1024_576)},
+ 	{AP1302_MODE_720P_1280_720, 1280, 720, ap1302_mode_1280_720, ARRAY_SIZE(ap1302_mode_1280_720)},
+ };
+ 
+@@ -1640,7 +1645,7 @@
+     printk( KERN_ALERT "**** %s %i\n", __func__, (int )__LINE__ );
+ 	ret = 0;
+ 
+-	ret = request_firmware(&sensor->fw_test, "ap1302/test_pattern.bin", &sensor->i2c_client->dev);
++	ret = request_firmware(&sensor->fw_test, AP1302_FW_TEST, &sensor->i2c_client->dev);
+ 	printk( KERN_ALERT "**** %s %i   ret: %i\n", __func__, (int )__LINE__, ret );
+ 
+ 	if ( !ret && sensor->fw_test->data == NULL )
+@@ -1653,7 +1658,7 @@
+ 
+ 	printk( KERN_ALERT "**** %s %i   size: %i\n", __func__, (int )__LINE__, sensor->fw_test->size );
+ 
+-	ret = request_firmware(&sensor->fw_sensor, "ap1302/on_ar1337.bin", &sensor->i2c_client->dev);
++	ret = request_firmware(&sensor->fw_sensor, AP1302_FW_NORMAL, &sensor->i2c_client->dev);
+ 	printk( KERN_ALERT "**** %s %i   ret: %i\n", __func__, (int )__LINE__, ret );
+ 
+ 	if ( !ret && sensor->fw_sensor->data == NULL )
+@@ -2013,5 +2018,5 @@
+ 
+ MODULE_DESCRIPTION("AP1302 MIPI Camera Subdev Driver");
+ MODULE_LICENSE("GPL");
+-MODULE_FIRMWARE("ap1302/on_ar1337.bin");
+-MODULE_FIRMWARE("ap1302/test_pattern.bin");
++MODULE_FIRMWARE(AP1302_FW_NORMAL);
++MODULE_FIRMWARE(AP1302_FW_TEST);

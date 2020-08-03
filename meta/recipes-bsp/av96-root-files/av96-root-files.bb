@@ -14,7 +14,7 @@ SRC_URI += "file://lib/firmware/brcm/BCM4345C0.hcd"
 SRC_URI += "file://sbin/stm32_usbotg_eth_config.sh"
 SRC_URI += "file://usr/bin/gldemo_start_stop.sh"
 SRC_URI += "file://usr/share/weston/icon/meld.png"
-SRC_URI += "file://lib/firmware/ap1302/on_ar1337.bin"
+SRC_URI += "file://lib/firmware/ap1302/on_ar1337_cdaf_dw9718.290520_01.bin"
 SRC_URI += "file://lib/firmware/ap1302/test_pattern.bin"
 
 do_install() {
