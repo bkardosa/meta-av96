@@ -34,7 +34,8 @@ SRC_URI += "file://0001-linux-av96-devicetree.patch \
         file://0101-mipi-debug.patch \
         file://0102-ap1302-dts.patch \
         file://0103-ap1302-no-focus.patch \
-        file://0105-ap1302-firmware-name.patch"
+        file://0105-ap1302-firmware-name.patch \
+        file://0106-ap1302-flicker-fix.patch"
 
 KERNEL_CONFIG_FRAGMENTS += "${WORKDIR}/fragments/4.19/fragment-06-brcmfmac.config"
 KERNEL_CONFIG_FRAGMENTS += "${WORKDIR}/fragments/4.19/fragment-07-hdmi.config"
