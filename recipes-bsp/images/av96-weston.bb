@@ -11,5 +11,13 @@ IMAGE_INSTALL += "dhcp-server \
                   trousers \
                   tpm2-tss-engine \
                   stress-ng \
-                  av96-root-files"
+                  av96-root-files \
+                  python3 \
+                  python3-pip \
+                  python3-pyserial \
+                  git \
+                  packagegroup-core-buildessential \
+                  python3-flask-socketio \
+                  lte-sensors-dashboard \
+                  "
 
