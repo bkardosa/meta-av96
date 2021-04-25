@@ -57,8 +57,8 @@
 		powerdown-gpios = <&gpiod 14 GPIO_ACTIVE_HIGH>;
 		i2csel-gpios = <&gpiof 12 GPIO_ACTIVE_HIGH>;
 		pwrcam-gpios = <&gpiob 5 GPIO_ACTIVE_HIGH>;
-		sensor-name = "ar1337";
-		firmware-file = "on_ar1337_cdaf_dw9718.290520_01.bin";
+		sensor-name = "ar0430";
+		firmware-file = "on_ar0430_headboard.bin";
 		rotation = <180>;
 		status = "okay";
 

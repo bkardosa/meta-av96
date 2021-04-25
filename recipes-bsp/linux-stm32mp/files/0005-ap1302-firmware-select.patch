@@ -1,0 +1,106 @@
+diff -Naurw ./drivers/media/i2c/ap1302.c ../kernel-source/drivers/media/i2c/ap1302.c
+--- ./drivers/media/i2c/ap1302.c	2021-04-25 00:00:48.381545660 +0200
++++ ../kernel-source/drivers/media/i2c/ap1302.c	2021-04-25 00:05:40.995870241 +0200
+@@ -32,7 +32,7 @@
+ #include <media/v4l2-subdev.h>
+ 
+ 
+-#define AP1302_DBG_CONSOLE_OUTPUT   0
++#define AP1302_DBG_CONSOLE_OUTPUT   1
+ #define AP1302_TRACE_LOG            0
+ 
+ #if AP1302_DBG_CONSOLE_OUTPUT
+@@ -41,8 +41,10 @@
+  #define DBG_PRINT
+ #endif
+ 
++#define AP1302_FW_DIR     "ap1302/"
+ #define AP1302_FW_TEST    "ap1302/test_pattern.bin"
+-#define AP1302_FW_NORMAL  "ap1302/on_ar1337_cdaf_dw9718.290520_01.bin"
++#define AP1302_FW_AR1337  "ap1302/on_ar1337_cdaf_dw9718.290520_01.bin"
++#define AP1302_FW_AR0430  "ap1302/on_ar0430_headboard.bin"
+ 
+ #define AP1302_EXP_TIME_DEFAULT         4000
+ #define AP1302_EXP_TIME_MAX             100000
+@@ -239,6 +241,7 @@
+ 	bool fw_down;
+ 	const struct firmware *fw_sensor;
+ 	const struct firmware *fw_test;
++	char sensor_name[32];
+ };
+ 
+ static inline struct ap1302_dev *to_ap1302_dev(struct v4l2_subdev *sd)
+@@ -1802,9 +1805,10 @@
+ 	return ret;
+ }
+ 
+-static int ap1302_download_fw(struct ap1302_dev *sensor)
++static int ap1302_download_fw(struct ap1302_dev *sensor, char *firmware_file)
+ {
+ 	int ret;
++	char fw_name[1024];
+ 
+     DBG_PRINT( KERN_ALERT "**** %s %i\n", __func__, (int )__LINE__ );
+ 	ret = 0;
+@@ -1822,8 +1826,10 @@
+ 
+ 	DBG_PRINT( KERN_ALERT "**** %s %i   size: %i\n", __func__, (int )__LINE__, sensor->fw_test->size );
+ 
+-	ret = request_firmware(&sensor->fw_sensor, AP1302_FW_NORMAL, &sensor->i2c_client->dev);
+-	DBG_PRINT( KERN_ALERT "**** %s %i   ret: %i\n", __func__, (int )__LINE__, ret );
++	strcpy( fw_name, AP1302_FW_DIR );
++	strcat( fw_name, firmware_file );
++	ret = request_firmware(&sensor->fw_sensor, fw_name, &sensor->i2c_client->dev);
++	DBG_PRINT( KERN_ALERT "**** %s %i   ret: %i   fw_name: %s\n", __func__, (int )__LINE__, ret, fw_name );
+ 
+ 	if ( !ret && sensor->fw_sensor->data == NULL )
+ 		ret = -EINVAL;
+@@ -1945,6 +1951,8 @@
+ 	struct fwnode_handle *endpoint;
+ 	struct ap1302_dev *sensor;
+ 	struct v4l2_mbus_framefmt *fmt;
++	const char *sensor_name;
++	const char *firmware_file;
+ 	char *path;
+ 	u32 rotation;
+ 	int ret;
+@@ -1966,6 +1974,22 @@
+ 
+     DBG_PRINT( KERN_ALERT "**** %s %i\n", __func__, (int )__LINE__ );
+ 
++	ret = of_property_read_string(dev->of_node, "sensor-name", &sensor_name);
++	if (ret) {
++		dev_err(dev, "Failed to get \"sensor-name\" property\n");
++		return -ENODEV;
++	}
++
++	ret = of_property_read_string(dev->of_node, "firmware-file", &firmware_file);
++	if (ret) {
++		dev_err(dev, "Failed to get \"firmware-file\" property\n");
++		return -ENODEV;
++	}
++
++    DBG_PRINT( KERN_ALERT "**** %s %i   sensor-name: %s\n", __func__, (int )__LINE__, sensor_name );
++    DBG_PRINT( KERN_ALERT "**** %s %i   firmware-file: %s\n", __func__, (int )__LINE__, firmware_file );
++	strncpy( sensor->sensor_name, sensor_name, sizeof(sensor->sensor_name) - 1);
++
+ 	sensor->xclk_freq = clk_get_rate(sensor->xclk);
+ 	if (sensor->xclk_freq < AP1302_XCLK_MIN ||
+ 	    sensor->xclk_freq > AP1302_XCLK_MAX) {
+@@ -2016,7 +2040,7 @@
+ 
+     DBG_PRINT( KERN_ALERT "**** %s %i\n", __func__, (int )__LINE__ );
+ 
+-	ret = ap1302_download_fw(sensor);
++	ret = ap1302_download_fw(sensor, firmware_file);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -2181,5 +2205,6 @@
+ 
+ MODULE_DESCRIPTION("AP1302 MIPI Camera Subdev Driver");
+ MODULE_LICENSE("GPL");
+-MODULE_FIRMWARE(AP1302_FW_NORMAL);
++MODULE_FIRMWARE(AP1302_FW_AR1337);
++MODULE_FIRMWARE(AP1302_FW_AR0430);
+ MODULE_FIRMWARE(AP1302_FW_TEST);

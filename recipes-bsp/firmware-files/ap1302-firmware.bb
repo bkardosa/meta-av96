@@ -4,6 +4,7 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 SRC_URI += "file://lib/firmware/ap1302/on_ar1337_cdaf_dw9718.290520_01.bin"
+SRC_URI += "file://lib/firmware/ap1302/on_ar0430_headboard.bin"
 SRC_URI += "file://lib/firmware/ap1302/test_pattern.bin"
 
 do_install() {

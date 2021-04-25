@@ -4,7 +4,7 @@ SRC_URI += "file://0001-linux-ap1302.patch"
 SRC_URI += "file://0002-media-ov5640-reduce-mipi-rate-according-to-maximum-p.patch"
 SRC_URI += "file://0003-media-v4l2-add-support-of-pclk_max_frequency-on-CSI-.patch"
 SRC_URI += "file://0004-media-ov5640-add-the-support-of-the-auto-focus.patch"
-
+SRC_URI += "file://0005-ap1302-firmware-select.patch"
 
 KERNEL_CONFIG_FRAGMENTS += "${WORKDIR}/fragments/5.4/fragment-06-brcmfmac.config"
 KERNEL_CONFIG_FRAGMENTS += "${WORKDIR}/fragments/5.4/fragment-07-hdmi.config"
